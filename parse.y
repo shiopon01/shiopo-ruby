@@ -76,12 +76,19 @@ main(int argc, const char**argv)
   const char *e_prog = NULL;
 
   if (argc < 2) {
-    fprintf(stderr, "Error\n");
+    fprintf(stderr, "arg Error\n");
     exit(1);
   }
 
   // options
   while (argv[1][0] == '-') {
+  }
+
+  FILE* fp = fopen(argv[1], "rb");
+
+  if (fp == NULL) {
+    fprintf(stderr, "file open Error\n");
+    exit(1);
   }
 
   extern int yyparse(void);
