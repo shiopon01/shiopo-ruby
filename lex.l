@@ -6,13 +6,34 @@
  */
 
 %{
-  #include <stdio.h>
-  #include "y.tab.h"
+#include <stdio.h>
+#include "y.tab.h"
 
-  int yywrap (void) {
-    return 1;
-  }
+int yywrap (void) {
+  return 1;
+}
+
+typedef struct parser_state {
+  int nerr;
+  void *lval;
+  const char *fname;
+  int lineno;
+  int tline;
+  /* TODO: should be separated as another context structure */
+} parser_state;
+
+static int
+lex_return(parser_state *p, int c)
+{
+  p->lineno = p->tline;
+  p->tline = yylineno;
+  return c;
+}
+
+#define LEX_RETURN(c) return lex_return(p, c)
 %}
+
+%option yylineno
 
 %%
 
@@ -21,6 +42,7 @@
 "*"  return MUL;
 "/"  return DIV;
 "\n" return CR;
+
 [1-9][0-9]* {
   double temp;
   sscanf (yytext, "%lf", &temp);

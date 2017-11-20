@@ -6,9 +6,12 @@
  */
 
 %{
-  #include <stdio.h>
-  #include <stdlib.h>
-  #define YYDEBUG 1
+#include <stdio.h>
+#include <stdlib.h>
+#define YYDEBUG 1
+
+extern int linenum;
+
 %}
 
 %union {
@@ -29,7 +32,7 @@ line_list
 line
   : expression CR
   {
-    printf(">>%lf\n", $1);
+    printf(">> %lf\n", $1);
   }
 expression
   : term
@@ -66,11 +69,23 @@ int yyerror (char const *str)
   return 0;
 }
 
-int main (void)
+int
+main(int argc, const char**argv)
 {
+  const char *prog = argv[0];
+  const char *e_prog = NULL;
+
+  if (argc < 2) {
+    fprintf(stderr, "Error\n");
+    exit(1);
+  }
+
+  // options
+  while (argv[1][0] == '-') {
+  }
+
   extern int yyparse(void);
   extern FILE *yyin;
-
   yyin = stdin;
   if (yyparse()) {
     fprintf(stderr, "Error\n");
