@@ -2,13 +2,17 @@ YACC = bison -y -d
 LEX = flex
 CC = gcc
 
-all: calc
+all: srb
 .PHONY: all
 
-calc: parse.y lex.l
+srb: parse.y lex.l
 	$(YACC) -o y.tab.c parse.y
 	$(LEX) lex.l
-	$(CC) -o calc y.tab.c lex.yy.c
+	$(CC) -o ./bin/srb y.tab.c lex.yy.c
+
+test:
+	./bin/srb ./examples/01hello.srb
+.PHONY: test
 
 clean:
 	rm -f y.tab.c y.tab.h lex.yy.c
