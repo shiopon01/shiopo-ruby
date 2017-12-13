@@ -11,7 +11,6 @@
 #define YYDEBUG 1
 
 extern int linenum;
-
 %}
 
 %union {
@@ -81,19 +80,46 @@ main(int argc, const char**argv)
   }
 
   // options
-  while (argv[1][0] == '-') {
+  while (argc > 1 && argv[1][0] == '-') {
+    printf("while %s\n", argv[1]);
+
+    const char *s = argv[1] + 1;
+    while (*s) {
+      switch (*s) {
+      case 'v':
+        break;
+
+      case 'e':
+        if (s[1] == '\0') {
+          e_prog = argv[2];
+        } else {
+          /* e_prog = &s[1]; // String of after `-e` */
+        }
+        goto next_arg;
+
+      default:
+        fprintf(stderr, "%s: unknown option -%c\n", prog, *s);
+        exit(1);
+      }
+      s++;
+    }
+
+  next_arg:
+    argc--;
+    argv++;
+    printf("next_arg %s\n", argv[0]);
   }
 
-  FILE* fp = fopen(argv[1], "rb");
-
-  if (fp == NULL) {
-    fprintf(stderr, "file open Error\n");
-    exit(1);
-  }
+  /* FILE* fp = fopen(argv[1], "rb"); */
+  /* if (fp == NULL) { */
+  /*   fprintf(stderr, "file open Error\n"); */
+  /*   exit(1); */
+  /* } */
 
   extern int yyparse(void);
   extern FILE *yyin;
   yyin = stdin;
+
   if (yyparse()) {
     fprintf(stderr, "Error\n");
     exit(1);
