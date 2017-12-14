@@ -9,10 +9,6 @@
 #include <stdio.h>
 #include "y.tab.h"
 
-int yywrap (void) {
-  return 1;
-}
-
 typedef struct parser_state {
   int nerr;
   void *lval;
@@ -22,8 +18,8 @@ typedef struct parser_state {
   /* TODO: should be separated as another context structure */
 } parser_state;
 
-static int
-lex_return(parser_state *p, int c)
+
+static int lex_return(parser_state *p, int c)
 {
   p->lineno = p->tline;
   p->tline = yylineno;
@@ -33,15 +29,17 @@ lex_return(parser_state *p, int c)
 #define LEX_RETURN(c) return lex_return(p, c)
 %}
 
+%option noyywrap
 %option yylineno
 
-%%
+TRAIL ([\t \n]|"#"[^\n]*"\n")*
 
-"+"  return ADD;
-"-"  return SUB;
-"*"  return MUL;
-"/"  return DIV;
-"\n" return CR;
+%%
+"+"{TRAIL}  return ADD;
+"-"{TRAIL}  return SUB;
+"*"{TRAIL}  return MUL;
+"/"{TRAIL}  return DIV;
+"\n"{TRAIL} return CR;
 
 [1-9][0-9]* {
   double temp;

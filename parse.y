@@ -8,6 +8,8 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
+#define FALSE 0
+#define TRUE 1
 #define YYDEBUG 1
 
 extern int linenum;
@@ -31,7 +33,7 @@ line_list
 line
   : expression CR
   {
-    printf(">> %lf\n", $1);
+    printf("%lf\n", $1);
   }
 expression
   : term
@@ -71,35 +73,37 @@ int yyerror (char const *str)
 int
 main(int argc, const char**argv)
 {
+  extern int yydebug;
+  // yydebug = 1;
+
   const char *prog = argv[0];
   const char *e_prog = NULL;
-
-  if (argc < 2) {
-    fprintf(stderr, "arg Error\n");
-    exit(1);
-  }
+  int version = FALSE;
+  // parser_state state;
 
   // options
   while (argc > 1 && argv[1][0] == '-') {
-    printf("while %s\n", argv[1]);
-
     const char *s = argv[1] + 1;
+
     while (*s) {
       switch (*s) {
       case 'v':
+        version = TRUE;
         break;
 
       case 'e':
+        printf("moji %c\n", *s);
         if (s[1] == '\0') {
           e_prog = argv[2];
         } else {
-          /* e_prog = &s[1]; // String of after `-e` */
+          fprintf(stderr, "%s: unknown option -%s\n", prog, s);
+          /* e_prog = ; // String of after `-e` */
         }
         goto next_arg;
 
       default:
-        fprintf(stderr, "%s: unknown option -%c\n", prog, *s);
-        exit(1);
+        fprintf(stderr, "%s: unknown option -%s\n", prog, s);
+        goto next_arg;
       }
       s++;
     }
@@ -107,21 +111,31 @@ main(int argc, const char**argv)
   next_arg:
     argc--;
     argv++;
-    printf("next_arg %s\n", argv[0]);
   }
 
-  /* FILE* fp = fopen(argv[1], "rb"); */
-  /* if (fp == NULL) { */
-  /*   fprintf(stderr, "file open Error\n"); */
-  /*   exit(1); */
-  /* } */
+  if (argc == 1) {
+    puts("no args err");
+  }
 
-  extern int yyparse(void);
-  extern FILE *yyin;
-  yyin = stdin;
+  if (e_prog) {
+  } else if (version) {
+    puts("version 0.00");
+    exit(0);
+  }
 
-  if (yyparse()) {
-    fprintf(stderr, "Error\n");
+  FILE* fp = fopen(argv[1], "rb");
+  if (fp == NULL) {
+    fprintf(stderr, "file open Error\n");
     exit(1);
   }
+
+  extern FILE *yyin;
+  yyin = fp;
+
+  if (yyparse()) {
+    fprintf(stderr, "parse error!!!!!!!1\n");
+    exit(1);
+  }
+
+  return 0;
 }
